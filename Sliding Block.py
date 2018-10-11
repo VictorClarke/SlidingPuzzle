@@ -10,20 +10,16 @@ from heapq import *
 
 # A state in a sliding-block puzzle environment.
 class SlidingBlockState(object):
-    # Set up a grid with all the numbers in order.    0 1 2
-    # For example, if size is 3, the grid should be:  3 4 5
-    # The 0 will represent the empty space.           6 7 8
     def __init__(self, size):
         self.grid = list()
         n = 0
         for r in range(size):
             row = list()
-            self.grid.append(row)  # grid was initially a single empty list, now it's an empty 2D list for each row
+            self.grid.append(row)  # Grid is now an empty 2D list for each row
             for c in range(size):
                 row.append(n)
                 n += 1
 
-    # Print the grid.
     def display(self):
         for row in self.grid:
             for number in row:
@@ -32,7 +28,6 @@ class SlidingBlockState(object):
         print()
 
     # Return a list of moves available in this state.
-    # You'll have to decide how to represent moves.
     def moves(self):
         moves = list()
         for r in range(len(self.grid)):
@@ -49,7 +44,6 @@ class SlidingBlockState(object):
         return moves
 
     # Return another state like this one but with one move made.
-    # Make sure there isn't any aliasing between the two states.
     def neighbor(self, move):
         neighbor = copy.deepcopy(self)  # takes copy of object without aliasing
         (dir, number) = move
@@ -92,30 +86,27 @@ class SlidingBlockState(object):
                     sum += (abs(goalJ - j) + abs(goalI - i))
         return sum
 
-    # These methods make equivalent states be recognized as == (similiar to say ".equals()")
-    def __hash__(self):  #hash method; whenever you do equals and not-equals you have to include a hash method
+    def __hash__(self):  
         initial_string = ''
         for i in range(len(self.grid)):
             for j in range(len(self.grid)):
                 initial_string += str(self.grid[i][j])
         return hash(initial_string)
 
-    def __eq__(self, other):  #(similiar to say ".equals()")
+    def __eq__(self, other):  
         return self.grid == other.grid
 
-    def __ne__(self, other):  #like saying is opposite
-        return not self == other  #But you cant say != bc it would be circular
-
+    def __ne__(self, other):  
+        return not self == other  
+    
     def __lt__(self, other):
         return self.grid < other.grid
 
 
 # An agent that uses breadth-first search to escape the maze.
 class SimpleSearchAgent(object):
-    #psuedo code from notebook implemented
     def plan(self, start):
 
-        #create an empty dictionary
         plan = dict()
         plan[start] = list()
         frontier = deque()
@@ -128,7 +119,7 @@ class SimpleSearchAgent(object):
                 if child not in plan:
                     frontier.append(child)
                     plan[child] = plan[parent] + [
-                        move]  #python adds lists together into one list and creates a copy automatically
+                        move]  
                     if child.wins():
                         return plan[child]
 
@@ -140,22 +131,19 @@ class HeuristicSearchAgent(object):
         plan = dict()
         plan[start] = list()
 
-        #For a regular queue we used a deque; for priority queue we're using heapq
         # Use list as a heap for a priority queue
         frontier = list()
         #heappush(frontier, (priority, item))
         heappush(frontier, (start.distance(goal), start))
-        #finished set; keep track of finished states with a set
-        finished = set()  #similar to a hashtable
+        finished = set() 
 
         # Take states off the frontier
         while len(frontier) > 0:
-            (priority, parent) = heappop(frontier)  #this takes the parent of the frontier
+            (priority, parent) = heappop(frontier)  
             finished.add(parent)
-            #now check if the parent is the goal; stop if we finished the goal state
             if parent == goal:
                 return plan[goal]
-            # Look at all the neighbors (children)
+            # Look at all the neighbors 
             for move in parent.moves():
                 child = parent.neighbor(move)
                 # Only consider ones we haven't finished
